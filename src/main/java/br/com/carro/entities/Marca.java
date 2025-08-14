@@ -11,33 +11,24 @@ import lombok.EqualsAndHashCode;
 import java.util.List;
 
 @Entity
-@Table(name = "tb_carro")
+@Table(name = "tb_marca")
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class Carro {
+public class Marca {
     @EqualsAndHashCode.Include
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(nullable = false)
-    private String modelo;
+    private String nome;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "marca_id")
-    private Marca marca;
+//    @OneToMany(mappedBy = "marca", fetch = FetchType.EAGER)
+   // @OneToMany(mappedBy = "marca", cascade = {CascadeType.MERGE, CascadeType.PERSIST}, orphanRemoval = true, fetch = FetchType.LAZY)
+//    @JsonManagedReference // Serializa Carros sem loop
 
-    @Column(nullable = false)
-    private String cor;
+    //Relacionamento com Carro - uma marca pode estar vinculado a vários carros
+    @OneToMany(mappedBy = "marca")
+    @JsonBackReference("marca-carros")
+    private List<Carro> carros;
 
-    @Column(nullable = false)
-    private Integer ano;
-
-    @ManyToMany
-    @JoinTable(
-            name = "tb_carro_proprietario",
-            joinColumns = @JoinColumn(name = "carro_id"),
-            inverseJoinColumns = @JoinColumn(name = "proprietario_id")
-    )
-
-    private List<Proprietario> proprietarios;
 }

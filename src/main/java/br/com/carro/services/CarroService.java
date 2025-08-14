@@ -31,22 +31,32 @@ public class CarroService {
     }
 
     // Buscar carro por ID
-    public Carro buscarPorId(Integer id) throws Exception {
+    public Carro buscarPorId(Long id) throws Exception {
         Carro carro = this.carroRepository.findById(id).get();
         return carro;
     }
 
     // Atualizar um carro
-    public String atualizar(Integer id, Carro carro) throws Exception {
+    public String atualizar(Long id, Carro carro) throws Exception {
         carro.setId(id);
         this.carroRepository.save(carro);
         return "Atualização feita com sucesso!";
     }
 
     // Excluir um carro
-    public String excluir(Integer id) throws Exception {
+    public String excluir(Long id) throws Exception {
         this.carroRepository.deleteById(id);
         return "Exclusão feita com sucesso!";
     }
 
+
+    // Excluir carro
+    public boolean deletar(Long id) {
+        Optional<Carro> optionalCarro = carroRepository.findById(id);
+        if (optionalCarro.isPresent()) {
+            carroRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
 }
