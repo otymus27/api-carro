@@ -1,12 +1,14 @@
 package br.com.carro.services;
 
 import br.com.carro.entities.Carro;
+import br.com.carro.entities.CarroDTO;
 import br.com.carro.repositories.CarroRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class CarroService {
@@ -59,4 +61,18 @@ public class CarroService {
         }
         return false;
     }
+
+    public List<CarroDTO> listarDto() {
+        return carroRepository.findAll().stream()
+                .map(c -> new CarroDTO(
+                        c.getId(),
+                        c.getModelo(),
+                        c.getCor(),
+                        c.getAno(),
+                        c.getMarca(),          // envia objeto completo
+                        c.getProprietarios()   // envia lista completa
+                ))
+                .collect(Collectors.toList());
+    }
+
 }

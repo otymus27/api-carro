@@ -1,7 +1,7 @@
 package br.com.carro.services;
 
-import br.com.carro.entities.Carro;
 import br.com.carro.entities.Marca;
+import br.com.carro.entities.Proprietario;
 import br.com.carro.repositories.MarcaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,9 +21,9 @@ public class MarcaService {
         return marcaRepository.findAll();
     }
 
-    public String cadastrar(Marca marca) {
-        marcaRepository.save(marca);
-        return "Marca cadastrada com sucesso!";
+    public Marca cadastrar(Marca marca) {
+        // Salvar e retornar o objeto criado
+        return marcaRepository.save(marca);
     }
 
     public String excluir(Long id) {

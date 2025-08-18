@@ -1,6 +1,7 @@
 package br.com.carro.controllers;
 
 import br.com.carro.entities.Marca;
+import br.com.carro.entities.Proprietario;
 import br.com.carro.services.MarcaService;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
@@ -45,13 +46,17 @@ public class MarcaController {
         }
     }
 
+    // Cadastrar
     @PostMapping
-    public ResponseEntity<String> cadastrar(@RequestBody Marca marca) {
+    public ResponseEntity<?> cadastrar(@RequestBody Marca marca) {
         try {
-            String msg = marcaService.cadastrar(marca);
-            return new ResponseEntity<>(msg, HttpStatus.CREATED);
+            Marca novaMarca = marcaService.cadastrar(marca);
+            return ResponseEntity.status(HttpStatus.CREATED).body(novaMarca);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
-            return new ResponseEntity<>("Erro ao cadastrar marca: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erro ao cadastrar registro: " + e.getMessage());
         }
     }
 

@@ -1,6 +1,7 @@
 package br.com.carro.controllers;
 
 import br.com.carro.entities.Carro;
+import br.com.carro.entities.CarroDTO;
 import br.com.carro.services.CarroService;
 import jakarta.transaction.Transactional;
 import org.slf4j.LoggerFactory;
@@ -29,14 +30,28 @@ public class CarroController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Carro>> listar() {
+    public ResponseEntity<List<CarroDTO>> listar() {
         try {
             List<Carro> lista = this.carroService.listar();
-            return new ResponseEntity<>(lista, HttpStatus.OK);
+
+            // Mapear para DTO
+            List<CarroDTO> listaDTO = lista.stream()
+                    .map(c -> new CarroDTO(
+                            c.getId(),
+                            c.getModelo(),
+                            c.getCor(),
+                            c.getAno(),
+                            c.getMarca(),          // envia objeto completo
+                            c.getProprietarios()   // envia lista completa
+                    ))
+                    .toList();
+
+            return new ResponseEntity<>(listaDTO, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         }
     }
+
 
     // Buscar carro por ID
     @GetMapping("/{id}")
