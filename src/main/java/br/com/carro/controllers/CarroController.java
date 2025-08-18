@@ -2,10 +2,12 @@ package br.com.carro.controllers;
 
 import br.com.carro.entities.Carro;
 import br.com.carro.entities.CarroDTO;
+import br.com.carro.entities.Marca;
 import br.com.carro.services.CarroService;
 import jakarta.transaction.Transactional;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -110,6 +112,15 @@ public class CarroController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new Mensagem("Carro com ID " + id + " não encontrado."));
         }
+    }
+
+    @GetMapping("/paginado/")
+    public ResponseEntity<Page<Carro>> listarPaginado(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+
+        Page<Carro> carros = carroService.listarPaginado(page, size);
+        return ResponseEntity.ok(carros);
     }
 
 

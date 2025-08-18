@@ -1,8 +1,12 @@
 package br.com.carro.services;
 
+import br.com.carro.entities.Marca;
 import br.com.carro.entities.Proprietario;
 import br.com.carro.repositories.ProprietarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -59,6 +63,11 @@ public class ProprietarioService {
     // Buscar proprietário por ID
     public Proprietario buscarPorId(Long id) {
         return proprietarioRepository.findById(id).orElse(null);
+    }
+
+    public Page<Proprietario> listarPaginado(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return proprietarioRepository.findAll(pageable);
     }
 }
 

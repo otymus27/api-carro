@@ -2,8 +2,12 @@ package br.com.carro.services;
 
 import br.com.carro.entities.Carro;
 import br.com.carro.entities.CarroDTO;
+import br.com.carro.entities.Marca;
 import br.com.carro.repositories.CarroRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -73,6 +77,11 @@ public class CarroService {
                         c.getProprietarios()   // envia lista completa
                 ))
                 .collect(Collectors.toList());
+    }
+
+    public Page<Carro> listarPaginado(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return carroRepository.findAll(pageable);
     }
 
 }
