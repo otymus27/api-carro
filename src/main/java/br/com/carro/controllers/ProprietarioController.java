@@ -8,11 +8,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/proprietario")
@@ -29,11 +34,48 @@ public class ProprietarioController {
         this.proprietarioService = proprietarioService;
     }
 
-    // Listar todos
+//    // Listar todos
+//    @GetMapping
+//    public List<Proprietario> listar() {
+//        return proprietarioService.listar();
+//    }
+
+    // Listar com paginação, filtro e ordenação
     @GetMapping
-    public List<Proprietario> listar() {
-        return proprietarioService.listar();
+    public ResponseEntity<Map<String, Object>> listar(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String cpf,
+            @RequestParam(required = false) String nome,
+            @RequestParam(defaultValue = "id") String sortField, // 'id' ou 'nome'
+            @RequestParam(defaultValue = "asc") String sortDir   // 'asc' ou 'desc'
+            ) {
+
+        // Cria Sort único baseado em campo e direção
+        Sort.Direction direction = "desc".equalsIgnoreCase(sortDir) ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Sort sortObj = Sort.by(direction, sortField);
+
+        Pageable pageable = PageRequest.of(page, size, sortObj);
+
+        Page<Proprietario> pageProprietarios;
+        if (nome != null && !nome.isBlank()) {
+            pageProprietarios = proprietarioService.buscarPorNome(nome, pageable);
+        } else if (cpf != null && !cpf.isBlank()) {
+            pageProprietarios = proprietarioService.buscarPorCpf(cpf, pageable);
+        } else {
+            pageProprietarios = proprietarioService.listar(pageable);
+        }
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("content", pageProprietarios.getContent());
+        response.put("page", pageProprietarios.getNumber() + 1);
+        response.put("size", pageProprietarios.getSize());
+        response.put("totalElements", pageProprietarios.getTotalElements());
+        response.put("totalPages", pageProprietarios.getTotalPages());
+
+        return ResponseEntity.ok(response);
     }
+
 
     // Buscar por ID
     @GetMapping("/{id}")
@@ -107,12 +149,5 @@ public class ProprietarioController {
         }
     }
 
-    @GetMapping("/paginado/")
-    public ResponseEntity<Page<Proprietario>> listarPaginado(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size) {
 
-        Page<Proprietario> lista = proprietarioService.listarPaginado(page, size);
-        return ResponseEntity.ok(lista);
-    }
 }
