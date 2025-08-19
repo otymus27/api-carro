@@ -9,4 +9,7 @@ public interface MarcaRepository extends JpaRepository<Marca, Long> {
 
     @Override
     Page<Marca> findAll(Pageable pageable);
+
+    // Para busca com filtro por nome (case insensitive)
+    Page<Marca> findByNomeContainingIgnoreCase(String nome, Pageable pageable);
 }

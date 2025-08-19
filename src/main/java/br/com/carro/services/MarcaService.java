@@ -51,4 +51,23 @@ public class MarcaService {
         return marcaRepository.findAll(pageable);
     }
 
+    // Para busca com filtro por nome (case insensitive)
+    public Page<Marca> listar(String filtro, Pageable pageable) {
+        if (filtro != null && !filtro.isEmpty()) {
+            return marcaRepository.findByNomeContainingIgnoreCase(filtro, pageable);
+        } else {
+            return marcaRepository.findAll(pageable);
+        }
+    }
+
+    // Listar todas as marcas com paginação
+    public Page<Marca> findAll(Pageable pageable) {
+        return marcaRepository.findAll(pageable);
+    }
+
+    // Listar marcas filtrando por nome (com paginação)
+    public Page<Marca> findByNomeContainingIgnoreCase(String nome, Pageable pageable) {
+        return marcaRepository.findByNomeContainingIgnoreCase(nome, pageable);
+    }
+
 }

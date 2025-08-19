@@ -8,11 +8,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/marca")
@@ -30,10 +37,50 @@ public class MarcaController {
     }
 
 
+//    @GetMapping
+//    public List<Marca> listar() {
+//        return marcaService.listar();
+//    }
+
+//    @GetMapping
+//    public ResponseEntity<Page<Marca>> listar(
+//            @RequestParam(required = false) String filtro,
+//            @PageableDefault(size = 5, sort = "nome", direction = Sort.Direction.ASC) Pageable pageable) {
+//
+//        Page<Marca> marcas = marcaService.listar(filtro, pageable);
+//        return ResponseEntity.ok(marcas);
+//    }
+
+
+    // Listar marcas com paginação e ordenação
     @GetMapping
-    public List<Marca> listar() {
-        return marcaService.listar();
+    public ResponseEntity<Map<String, Object>> getMarcas(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String nome,
+            @RequestParam(defaultValue = "id") String sortField, // 'id' ou 'nome'
+            @RequestParam(defaultValue = "asc") String sortDir   // 'asc' ou 'desc'
+    ) {
+        // Cria Sort único baseado em campo e direção
+        Sort.Direction direction = "desc".equalsIgnoreCase(sortDir) ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Sort sortObj = Sort.by(direction, sortField);
+
+        Pageable pageable = PageRequest.of(page, size, sortObj);
+
+        Page<Marca> pageMarcas = (nome != null && !nome.isBlank())
+                ? marcaService.findByNomeContainingIgnoreCase(nome, pageable)
+                : marcaService.findAll(pageable);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("content", pageMarcas.getContent());
+        response.put("page", pageMarcas.getNumber());
+        response.put("size", pageMarcas.getSize());
+        response.put("totalElements", pageMarcas.getTotalElements());
+        response.put("totalPages", pageMarcas.getTotalPages());
+
+        return ResponseEntity.ok(response);
     }
+
 
     // Buscar carro por ID
     @GetMapping("/{id}")
@@ -92,4 +139,7 @@ public class MarcaController {
         Page<Marca> marcas = marcaService.listarPaginado(page, size);
         return ResponseEntity.ok(marcas);
     }
+
+
+
 }

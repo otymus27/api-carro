@@ -22,10 +22,6 @@ public class Marca {
     @Column(nullable = false)
     private String nome;
 
-//    @OneToMany(mappedBy = "marca", fetch = FetchType.EAGER)
-   // @OneToMany(mappedBy = "marca", cascade = {CascadeType.MERGE, CascadeType.PERSIST}, orphanRemoval = true, fetch = FetchType.LAZY)
-//    @JsonManagedReference // Serializa Carros sem loop
-
     //Relacionamento com Carro - uma marca pode estar vinculado a vários carros
     @OneToMany(mappedBy = "marca")
     @JsonBackReference("marca-carros")
