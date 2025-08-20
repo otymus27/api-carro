@@ -21,11 +21,6 @@ public class ProprietarioService {
         this.proprietarioRepository = proprietarioRepository;
     }
 
-    // Listar todos os proprietários
-//    public List<Proprietario> listar(Pageable pageable) {
-//        return proprietarioRepository.findAll(pageable);
-//    }
-
     public Proprietario cadastrar(Proprietario proprietario) {
         // Remover máscara de CPF e telefone
         proprietario.setCpf(proprietario.getCpf().replaceAll("\\D", ""));
@@ -77,6 +72,13 @@ public class ProprietarioService {
 
     public Page<Proprietario> buscarPorCpf(String cpf, Pageable pageable) {
         return proprietarioRepository.findByCpfContaining(cpf, pageable);
+    }
+
+    public Page<Proprietario> listar(String nome, String cpf, Pageable pageable) {
+        if (nome == null || nome.trim().isEmpty()) {
+            return proprietarioRepository.findAll(pageable);
+        }
+        return proprietarioRepository.findByNomeContainingIgnoreCaseOrCpfContainingIgnoreCase(nome, cpf, pageable);
     }
 }
 

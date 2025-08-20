@@ -17,4 +17,11 @@ public interface ProprietarioRepository extends JpaRepository<Proprietario, Long
     Page<Proprietario> findByNomeContainingIgnoreCase(String nome, Pageable pageable);
 
     Page<Proprietario> findByCpfContaining(String cpf, Pageable pageable);
+
+    // Buscar por nome ou cpf
+    Page<Proprietario> findByNomeContainingIgnoreCaseOrCpfContaining(String nome, String cpf, Pageable pageable);
+
+    Page<Proprietario> findByNomeContainingIgnoreCaseOrCpfContainingIgnoreCase(String nome, String cpf, Pageable pageable);
+
+
 }

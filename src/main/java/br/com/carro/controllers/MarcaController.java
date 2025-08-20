@@ -36,27 +36,11 @@ public class MarcaController {
         this.marcaService = marcaService;
     }
 
-
-//    @GetMapping
-//    public List<Marca> listar() {
-//        return marcaService.listar();
-//    }
-
-//    @GetMapping
-//    public ResponseEntity<Page<Marca>> listar(
-//            @RequestParam(required = false) String filtro,
-//            @PageableDefault(size = 5, sort = "nome", direction = Sort.Direction.ASC) Pageable pageable) {
-//
-//        Page<Marca> marcas = marcaService.listar(filtro, pageable);
-//        return ResponseEntity.ok(marcas);
-//    }
-
-
     // Listar marcas com paginação e ordenação
     @GetMapping
     public ResponseEntity<Map<String, Object>> getMarcas(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "5") int size,
             @RequestParam(required = false) String nome,
             @RequestParam(defaultValue = "id") String sortField, // 'id' ou 'nome'
             @RequestParam(defaultValue = "asc") String sortDir   // 'asc' ou 'desc'
