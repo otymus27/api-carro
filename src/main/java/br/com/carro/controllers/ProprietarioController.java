@@ -34,12 +34,6 @@ public class ProprietarioController {
         this.proprietarioService = proprietarioService;
     }
 
-//    // Listar todos
-//    @GetMapping
-//    public List<Proprietario> listar() {
-//        return proprietarioService.listar();
-//    }
-
     // Listar com paginação, filtro e ordenação
     @GetMapping
     public ResponseEntity<Map<String, Object>> listar(

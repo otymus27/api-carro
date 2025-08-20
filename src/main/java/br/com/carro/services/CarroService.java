@@ -3,6 +3,7 @@ package br.com.carro.services;
 import br.com.carro.entities.Carro;
 import br.com.carro.entities.CarroDTO;
 import br.com.carro.entities.Marca;
+import br.com.carro.entities.Proprietario;
 import br.com.carro.repositories.CarroRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -79,9 +80,38 @@ public class CarroService {
                 .collect(Collectors.toList());
     }
 
-    public Page<Carro> listarPaginado(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+    // Listar todas as marcas com paginação
+    public Page<Carro> listar(Pageable pageable) {
         return carroRepository.findAll(pageable);
     }
+
+
+    // Listagem com paginação, filtro e ordenação
+    public Page<CarroDTO> listar(String modelo, String cor, Integer ano, String marca, Pageable pageable) {
+        Page<Carro> carros;
+
+        if (modelo != null && !modelo.isEmpty()) {
+            carros = carroRepository.findByModeloContainingIgnoreCase(modelo, pageable);
+        } else if (cor != null && !cor.isEmpty()) {
+            carros = carroRepository.findByCorContainingIgnoreCase(cor, pageable);
+        } else if (ano != null) {
+            carros = carroRepository.findByAno(ano, pageable);
+        } else if (marca != null && !marca.isEmpty()) {
+            carros = carroRepository.findByMarca_NomeContainingIgnoreCase(marca, pageable);
+        } else {
+            carros = carroRepository.findAll(pageable);
+        }
+
+        return carros.map(c -> new CarroDTO(
+                c.getId(),
+                c.getModelo(),
+                c.getCor(),
+                c.getAno(),
+                c.getMarca(),
+                c.getProprietarios()
+        ));
+    }
+
+
 
 }

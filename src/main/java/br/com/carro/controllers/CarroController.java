@@ -8,13 +8,18 @@ import jakarta.transaction.Transactional;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/carro")
@@ -31,28 +36,59 @@ public class CarroController {
         this.carroService = carroService;
     }
 
+//    @GetMapping
+//    public ResponseEntity<List<CarroDTO>> listar() {
+//        try {
+//            List<Carro> lista = this.carroService.listar();
+//
+//            // Mapear para DTO
+//            List<CarroDTO> listaDTO = lista.stream()
+//                    .map(c -> new CarroDTO(
+//                            c.getId(),
+//                            c.getModelo(),
+//                            c.getCor(),
+//                            c.getAno(),
+//                            c.getMarca(),          // envia objeto completo
+//                            c.getProprietarios()   // envia lista completa
+//                    ))
+//                    .toList();
+//
+//            return new ResponseEntity<>(listaDTO, HttpStatus.OK);
+//        } catch (Exception e) {
+//            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+//        }
+//    }
+
+
+
+
+    // Listar com paginação, filtro e ordenação
     @GetMapping
-    public ResponseEntity<List<CarroDTO>> listar() {
-        try {
-            List<Carro> lista = this.carroService.listar();
+    public ResponseEntity<Map<String, Object>> listar(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String modelo,
+            @RequestParam(required = false) String marca,
+            @RequestParam(required = false) Integer ano,
+            @RequestParam(required = false) String cor,
+            @RequestParam(defaultValue = "modelo") String sortField,
+            @RequestParam(defaultValue = "asc") String sortDir
+    ) {
+        Sort.Direction direction = "desc".equalsIgnoreCase(sortDir) ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortField));
 
-            // Mapear para DTO
-            List<CarroDTO> listaDTO = lista.stream()
-                    .map(c -> new CarroDTO(
-                            c.getId(),
-                            c.getModelo(),
-                            c.getCor(),
-                            c.getAno(),
-                            c.getMarca(),          // envia objeto completo
-                            c.getProprietarios()   // envia lista completa
-                    ))
-                    .toList();
+        Page<CarroDTO> pageCarros = carroService.listar(modelo,marca, ano, cor, pageable);
 
-            return new ResponseEntity<>(listaDTO, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-        }
+        Map<String, Object> response = new HashMap<>();
+        response.put("content", pageCarros.getContent());
+        response.put("page", pageCarros.getNumber());
+        response.put("size", pageCarros.getSize());
+        response.put("totalElements", pageCarros.getTotalElements());
+        response.put("totalPages", pageCarros.getTotalPages());
+
+        return ResponseEntity.ok(response);
     }
+
 
 
     // Buscar carro por ID
@@ -114,14 +150,7 @@ public class CarroController {
         }
     }
 
-    @GetMapping("/paginado/")
-    public ResponseEntity<Page<Carro>> listarPaginado(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size) {
 
-        Page<Carro> carros = carroService.listarPaginado(page, size);
-        return ResponseEntity.ok(carros);
-    }
 
 
 }
