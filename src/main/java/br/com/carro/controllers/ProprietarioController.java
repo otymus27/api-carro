@@ -49,55 +49,18 @@ public class ProprietarioController {
         Sort sortObj = Sort.by(direction, sortField);
         Pageable pageable = PageRequest.of(page, size, sortObj);
 
-        Page<Proprietario> pageProprietarios;
+        Page<Proprietario> lista;
 
         if (nome != null && !nome.isBlank()) {
-            pageProprietarios = proprietarioService.buscarPorNome(nome, pageable);
+            lista = proprietarioService.buscarPorNome(nome, pageable);
         } else if (cpf != null && !cpf.isBlank()) {
-            pageProprietarios = proprietarioService.buscarPorCpf(cpf, pageable);
+            lista = proprietarioService.buscarPorCpf(cpf, pageable);
         } else {
-            pageProprietarios = proprietarioService.listar(pageable);
+            lista = proprietarioService.listar(pageable);
         }
 
-        return ResponseEntity.ok(pageProprietarios);
+        return ResponseEntity.ok(lista);
     }
-
-//    // Listar com paginação, filtro e ordenação
-//    @GetMapping("teste")
-//    public ResponseEntity<Map<String, Object>> listar(
-//            @RequestParam(defaultValue = "0") int page,
-//            @RequestParam(defaultValue = "5") int size,
-//            @RequestParam(required = false) String cpf,
-//            @RequestParam(required = false) String nome,
-//            @RequestParam(defaultValue = "id") String sortField, // 'id' ou 'nome'
-//            @RequestParam(defaultValue = "asc") String sortDir   // 'asc' ou 'desc'
-//            ) {
-//
-//        // Cria Sort único baseado em campo e direção
-//        Sort.Direction direction = "desc".equalsIgnoreCase(sortDir) ? Sort.Direction.DESC : Sort.Direction.ASC;
-//        Sort sortObj = Sort.by(direction, sortField);
-//
-//        Pageable pageable = PageRequest.of(page, size, sortObj);
-//
-//        Page<Proprietario> pageProprietarios;
-//        if (nome != null && !nome.isBlank()) {
-//            pageProprietarios = proprietarioService.buscarPorNome(nome, pageable);
-//        } else if (cpf != null && !cpf.isBlank()) {
-//            pageProprietarios = proprietarioService.buscarPorCpf(cpf, pageable);
-//        } else {
-//            pageProprietarios = proprietarioService.listar(pageable);
-//        }
-//
-//        Map<String, Object> response = new HashMap<>();
-//        response.put("content", pageProprietarios.getContent());
-//        response.put("page", pageProprietarios.getNumber() + 1);
-//        response.put("size", pageProprietarios.getSize());
-//        response.put("totalElements", pageProprietarios.getTotalElements());
-//        response.put("totalPages", pageProprietarios.getTotalPages());
-//
-//        return ResponseEntity.ok(response);
-//    }
-
 
     // Buscar por ID
     @GetMapping("/{id}")

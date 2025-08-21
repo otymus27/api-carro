@@ -36,60 +36,35 @@ public class CarroController {
         this.carroService = carroService;
     }
 
-//    @GetMapping
-//    public ResponseEntity<List<CarroDTO>> listar() {
-//        try {
-//            List<Carro> lista = this.carroService.listar();
-//
-//            // Mapear para DTO
-//            List<CarroDTO> listaDTO = lista.stream()
-//                    .map(c -> new CarroDTO(
-//                            c.getId(),
-//                            c.getModelo(),
-//                            c.getCor(),
-//                            c.getAno(),
-//                            c.getMarca(),          // envia objeto completo
-//                            c.getProprietarios()   // envia lista completa
-//                    ))
-//                    .toList();
-//
-//            return new ResponseEntity<>(listaDTO, HttpStatus.OK);
-//        } catch (Exception e) {
-//            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-//        }
-//    }
-
-
-
-
-    // Listar com paginação, filtro e ordenação
+    // Listar registros com paginação, filtros e ordenação
     @GetMapping
-    public ResponseEntity<Map<String, Object>> listar(
+    public ResponseEntity<Page<Carro>> listar(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "5") int size,
             @RequestParam(required = false) String modelo,
-            @RequestParam(required = false) String marca,
             @RequestParam(required = false) Integer ano,
-            @RequestParam(required = false) String cor,
-            @RequestParam(defaultValue = "modelo") String sortField,
+            @RequestParam(required = false) String marca, // ✅ Novo parâmetro para o filtro de marca
+            @RequestParam(defaultValue = "id") String sortField,
             @RequestParam(defaultValue = "asc") String sortDir
     ) {
         Sort.Direction direction = "desc".equalsIgnoreCase(sortDir) ? Sort.Direction.DESC : Sort.Direction.ASC;
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortField));
+        Sort sortObj = Sort.by(direction, sortField);
+        Pageable pageable = PageRequest.of(page, size, sortObj);
 
-        Page<CarroDTO> pageCarros = carroService.listar(modelo,marca, ano, cor, pageable);
+        Page<Carro> lista;
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("content", pageCarros.getContent());
-        response.put("page", pageCarros.getNumber());
-        response.put("size", pageCarros.getSize());
-        response.put("totalElements", pageCarros.getTotalElements());
-        response.put("totalPages", pageCarros.getTotalPages());
+        if (modelo != null && !modelo.isBlank()) {
+            lista = carroService.buscarPorNome(modelo, pageable);
+        } else if (ano != null) {
+            lista = carroService.buscarPorAno(ano, pageable);
+        } else if (marca != null && !marca.isBlank()) { // ✅ Nova condição para filtrar por marca
+            lista = carroService.buscarPorMarcaNome(marca, pageable);
+        } else {
+            lista = carroService.listar(pageable);
+        }
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(lista);
     }
-
-
 
     // Buscar carro por ID
     @GetMapping("/{id}")
@@ -114,7 +89,7 @@ public class CarroController {
     }
 
     // Atualizar um carro
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<String> atualizar(@PathVariable Long id, @RequestBody Carro carro) {
         try {
             // Atualiza o carro usando o service; se não existir, lança exceção
@@ -127,6 +102,7 @@ public class CarroController {
 
     // Excluir um carro
     @DeleteMapping("/{id}")
+    @Transactional
     public ResponseEntity<String> excluir(@PathVariable Long id) {
         try {
             // Chama o service que já verifica se o carro existe e lança exceção se não existir
@@ -136,21 +112,6 @@ public class CarroController {
             return new ResponseEntity<>("Erro ao excluir registro: " + e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
-
-    @DeleteMapping("deletar/{id}")
-    @Transactional
-    public ResponseEntity<?> deletar(@PathVariable Long id) {
-        logger.info("Tentando excluir carro com ID: {}");
-        boolean excluido = carroService.deletar(id);
-        if (excluido) {
-            return ResponseEntity.ok(new Mensagem("Carro excluído com sucesso."));
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new Mensagem("Carro com ID " + id + " não encontrado."));
-        }
-    }
-
-
 
 
 }

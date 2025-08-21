@@ -85,33 +85,19 @@ public class CarroService {
         return carroRepository.findAll(pageable);
     }
 
-
-    // Listagem com paginação, filtro e ordenação
-    public Page<CarroDTO> listar(String modelo, String cor, Integer ano, String marca, Pageable pageable) {
-        Page<Carro> carros;
-
-        if (modelo != null && !modelo.isEmpty()) {
-            carros = carroRepository.findByModeloContainingIgnoreCase(modelo, pageable);
-        } else if (cor != null && !cor.isEmpty()) {
-            carros = carroRepository.findByCorContainingIgnoreCase(cor, pageable);
-        } else if (ano != null) {
-            carros = carroRepository.findByAno(ano, pageable);
-        } else if (marca != null && !marca.isEmpty()) {
-            carros = carroRepository.findByMarca_NomeContainingIgnoreCase(marca, pageable);
-        } else {
-            carros = carroRepository.findAll(pageable);
-        }
-
-        return carros.map(c -> new CarroDTO(
-                c.getId(),
-                c.getModelo(),
-                c.getCor(),
-                c.getAno(),
-                c.getMarca(),
-                c.getProprietarios()
-        ));
+    // Listar registros filtrando por modelo (com paginação)
+    public Page<Carro> buscarPorNome(String modelo, Pageable pageable) {
+        return carroRepository.findByModeloContainingIgnoreCase(modelo, pageable);
     }
 
+    // Listar registros filtrando por ano (com paginação)
+    public Page<Carro> buscarPorAno(Integer ano, Pageable pageable) {
+        return carroRepository.findByAno(ano, pageable);
+    }
+
+    public Page<Carro> buscarPorMarcaNome(String marca, Pageable pageable) {
+        return carroRepository.findByMarcaNomeContainingIgnoreCase(marca, pageable);
+    }
 
 
 }
