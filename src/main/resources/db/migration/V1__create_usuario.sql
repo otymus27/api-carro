@@ -22,13 +22,13 @@ CREATE TABLE IF NOT EXISTS tb_usuarios_roles (
 
 -- Inserção de roles
 INSERT INTO tb_roles (nome) VALUES
-                                ('ADMIN'),
-                                ('BASIC'),
-                                ('GERENTE');
+                                ('ROLE_ADMIN'),
+                                ('ROLE_BASIC'),
+                                ('ROLE_GERENTE');
 
 -- Inserção de usuários
 INSERT INTO tb_usuarios (login, senha) VALUES
-                                           ('admin', '$2a$12$jQ0dPE2juypEy07pKe1uBOjcUzxJq8lSIb/nM1.pQATbzWvoB0kN2'),  -- senha: senha123
+                                           ('admin', '$2a$10$1gsoSHRdVMa7UwJImK2a5OkKADIzzG9zVaA.zcXpVWPhBZ5MIY8Mi'),  -- senha: senha123
                                            ('usuario2', '$2a$10$wgeAMfb8E1olrHj5Ko5P7T7FyvhYrgHQt18sJll8eLg1BYJc0AXve'),  -- senha: senha456
                                            ('usuario3', '$2a$10$Vt6ldlS92W5N6HF1OS5qfIWdb0P7Zfjdqxq6rzQ3S1CnllXaZRaBu'),  -- senha: senha789
                                            ('usuario4', '$2a$10$gu9vENxyFVVic/ZJmv1iXtnH/q64jLg5c9PjBdVRwYHhM19wXy6jS'),  -- senha: senha101
