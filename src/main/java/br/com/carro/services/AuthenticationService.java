@@ -1,25 +1,25 @@
-package br.com.carro.autenticacao;
+package br.com.carro.services;
 
 import br.com.carro.repositories.UsuarioRepository;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-@Service // ✅ Certifique-se que é um @Service
-public class JpaUserDetailsService implements UserDetailsService {
+@Service
+@Primary
+public class AuthenticationService implements UserDetailsService {
 
     private final UsuarioRepository usuarioRepository;
 
-    public JpaUserDetailsService(UsuarioRepository usuarioRepository) {
+    public AuthenticationService(UsuarioRepository usuarioRepository) {
         this.usuarioRepository = usuarioRepository;
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // ✅ A query personalizada em UsuarioRepository.findByLogin deve carregar as roles
-        return usuarioRepository
-                .findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + username));
+        return usuarioRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado com o login: " + username));
     }
 }

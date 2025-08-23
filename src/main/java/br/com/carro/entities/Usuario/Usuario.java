@@ -1,16 +1,13 @@
 package br.com.carro.entities.Usuario;
 
-import br.com.carro.entities.Login.LoginRequest;
 import br.com.carro.entities.Role.Role;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Set;
 
 @Entity
@@ -25,9 +22,9 @@ public class Usuario implements UserDetails {
     private Long id;
 
     @Column(unique = true)
-    private String login;
+    private String username;
 
-    private String senha;
+    private String password;
 
     @ManyToMany(fetch = FetchType.EAGER) // ✅ FetchType.EAGER para carregar as permissões imediatamente
     @JoinTable(
@@ -47,12 +44,12 @@ public class Usuario implements UserDetails {
 
     @Override
     public String getPassword() {
-        return this.senha;
+        return this.password;
     }
 
     @Override
     public String getUsername() {
-        return this.login;
+        return this.username;
     }
 
     @Override

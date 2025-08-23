@@ -19,7 +19,7 @@ public class Role implements GrantedAuthority {
 
     @Override
     public String getAuthority() {
-        return this.nome;
+        return "ROLE_" + this.nome;
     }
 
 }

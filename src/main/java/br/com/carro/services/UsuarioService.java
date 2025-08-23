@@ -45,8 +45,8 @@ public class UsuarioService {
 
         // Criar usuário
         Usuario usuario = new Usuario();
-        usuario.setLogin(dto.login());
-        usuario.setSenha(passwordEncoder.encode(dto.senha()));
+        usuario.setUsername(dto.login());
+        usuario.setPassword(passwordEncoder.encode(dto.senha()));
         usuario.setRoles(roles);
 
         usuarioRepository.save(usuario);
@@ -54,7 +54,7 @@ public class UsuarioService {
         // Converter para DTO de resposta
         return new UsuarioDto(
                 usuario.getId(),
-                usuario.getLogin(),
+                usuario.getUsername(),
                 usuario.getRoles().stream()
                         .map(role -> new RoleDto(role.getId(), role.getNome()))
                         .collect(Collectors.toSet())
@@ -70,7 +70,7 @@ public class UsuarioService {
 
             return new UsuarioDto(
                     usuario.getId(),
-                    usuario.getLogin(),
+                    usuario.getUsername(),
                     rolesDto
             );
         }).collect(Collectors.toList());
@@ -86,7 +86,7 @@ public class UsuarioService {
 
             return new UsuarioDto(
                     usuario.getId(),
-                    usuario.getLogin(),
+                    usuario.getUsername(),
                     rolesDto
             );
         }
@@ -98,11 +98,11 @@ public class UsuarioService {
         if (optionalUsuario.isPresent()) {
             Usuario usuario = optionalUsuario.get();
 
-            usuario.setLogin(dto.login());
+            usuario.setUsername(dto.login());
 
             if (dto.senha() != null && !dto.senha().isBlank()) {
                 String senhaCriptografada = passwordEncoder.encode(dto.senha());
-                usuario.setSenha(senhaCriptografada);
+                usuario.setPassword(senhaCriptografada);
             }
 
             // Atualiza as roles
@@ -118,7 +118,7 @@ public class UsuarioService {
                     .map(role -> new RoleDto(role.getId(), role.getNome()))
                     .collect(Collectors.toSet());
 
-            return new UsuarioDto(usuario.getId(), usuario.getLogin(), rolesDto);
+            return new UsuarioDto(usuario.getId(), usuario.getUsername(), rolesDto);
         }
 
         return null;
@@ -142,7 +142,7 @@ public class UsuarioService {
         // Obtém o login (username) do usuário autenticado no contexto de segurança
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        Optional<Usuario> optionalUsuario = usuarioRepository.findByLogin(login);
+        Optional<Usuario> optionalUsuario = usuarioRepository.findByUsername(login);
         if (optionalUsuario.isPresent()) {
             Usuario usuario = optionalUsuario.get();
             Set<RoleDto> rolesDto = usuario.getRoles().stream()
@@ -151,7 +151,7 @@ public class UsuarioService {
 
             return new UsuarioDto(
                     usuario.getId(),
-                    usuario.getLogin(),
+                    usuario.getUsername(),
                     rolesDto
             );
         }
@@ -159,8 +159,8 @@ public class UsuarioService {
         return null;
     }
 
-    public List<UsuarioDto> buscarPorNome(String nome) {
-        List<Usuario> usuarios = usuarioRepository.findByLoginContaining(nome);
+    public List<UsuarioDto> buscarPorNome(String username) {
+        List<Usuario> usuarios = usuarioRepository.findByUsernameContaining(username);
         if (!usuarios.isEmpty()) {
             return usuarios.stream()
                     .map(usuario -> {
@@ -171,7 +171,7 @@ public class UsuarioService {
 
                         return new UsuarioDto(
                                 usuario.getId(),
-                                usuario.getLogin(),
+                                usuario.getUsername(),
                                 rolesDto
                         );
                     })
@@ -187,7 +187,7 @@ public class UsuarioService {
                 .map(role -> new RoleDto(role.getId(), role.getNome()))
                 .collect(Collectors.toSet());
 
-        return new UsuarioDto(usuario.getId(), usuario.getLogin(), roles);
+        return new UsuarioDto(usuario.getId(), usuario.getUsername(), roles);
     }
 
     public List<UsuarioDto> listarPaginado(int page, int size) {
@@ -201,7 +201,7 @@ public class UsuarioService {
 
                     return new UsuarioDto(
                             u.getId(),
-                            u.getLogin(),
+                            u.getUsername(),
                             rolesDto
                     );
                 })
