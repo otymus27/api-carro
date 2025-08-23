@@ -27,7 +27,7 @@ public class AuthenticationController {
 
         Authentication authentication = this.authenticationManager.authenticate(authenticationToken);
 
-        String token = tokenService.generateToken(authentication);
+        String token = tokenService.gerarToken(authentication);
 
         return new LoginResponse(token, 36000L); // Retorna o token e o tempo de expiração
     }
