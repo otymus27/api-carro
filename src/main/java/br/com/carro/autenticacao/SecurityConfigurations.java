@@ -36,8 +36,9 @@ import java.util.Base64;
 @EnableWebSecurity
 public class SecurityConfigurations {
 
-//    @Value("${jwt.secret}")
-    private String jwtSecret="MySuperSecretKeyForJWTThatIsLongEnoughForTestingOnly12345"; // pode ser base64-url, base64 comum ou texto puro
+    // Aqui injetamos o valor de 'jwt.secret' do application.properties/yml
+    @Value("${jwt.secret}")
+    private String jwtSecret;
 
     private byte[] secretBytes; // armazenamos a chave já resolvida
     private SecretKey hmacKey;
