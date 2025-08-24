@@ -13,17 +13,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 @RestController
 @RequestMapping("/api/carro")
-@CrossOrigin("*")
 public class CarroController {
 
     private static final Logger logger = LoggerFactory.getLogger(CarroController.class);
@@ -37,6 +33,8 @@ public class CarroController {
     }
 
     // Listar registros com paginação, filtros e ordenação
+    // ✅ Usuários com a role 'USER' ou 'ADMIN' podem acessar este método
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     @GetMapping
     public ResponseEntity<Page<Carro>> listar(
             @RequestParam(defaultValue = "0") int page,
@@ -68,6 +66,7 @@ public class CarroController {
 
     // Buscar carro por ID
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     public ResponseEntity<?> buscarPorId(@PathVariable Long id) {
         try {
             // Chama o service que retorna o carro ou lança exceção se não existir
@@ -79,6 +78,7 @@ public class CarroController {
     }
 
     @PostMapping(consumes = "application/json", produces = "application/json")
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     public ResponseEntity<String> cadastrar(@RequestBody Carro carro) {
         try {
             String mensagem = this.carroService.cadastrar(carro);
@@ -90,6 +90,7 @@ public class CarroController {
 
     // Atualizar um carro
     @PatchMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     public ResponseEntity<String> atualizar(@PathVariable Long id, @RequestBody Carro carro) {
         try {
             // Atualiza o carro usando o service; se não existir, lança exceção
@@ -103,6 +104,7 @@ public class CarroController {
     // Excluir um carro
     @DeleteMapping("/{id}")
     @Transactional
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     public ResponseEntity<String> excluir(@PathVariable Long id) {
         try {
             // Chama o service que já verifica se o carro existe e lança exceção se não existir

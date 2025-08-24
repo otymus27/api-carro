@@ -23,18 +23,22 @@ public class TokenService {
 
     public String gerarToken(Authentication authentication) {
         Instant now = Instant.now();
+        long expiry = 36000L; // 10 horas, como no seu log
 
-        var roles = authentication.getAuthorities().stream()
+        // ✅ Isso coleta as autoridades EXATAMENTE como elas são definidas no UserDetailsService
+        // Se seu UserDetailsService define "ROLE_ADMIN", aqui será coletado "ROLE_ADMIN".
+        var scopes = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
 
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer("carro-api")
                 .issuedAt(now)
-                .expiresAt(now.plusSeconds(60 * 60)) // 1h
+                .expiresAt(now.plusSeconds(expiry))
                 .subject(authentication.getName())
-                .claim("roles", roles)
+                .claim("roles", scopes) // A claim "roles" terá, por exemplo, ["ROLE_ADMIN"]
                 .build();
+
 
         // >>> Header COM algoritmo HS256 <<<
         JwsHeader header = JwsHeader.with(MacAlgorithm.HS256).build();

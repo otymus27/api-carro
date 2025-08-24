@@ -14,15 +14,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/proprietario")
-@CrossOrigin("*")
 public class ProprietarioController {
 
     private static final Logger logger = LoggerFactory.getLogger(ProprietarioController.class);
@@ -37,6 +34,9 @@ public class ProprietarioController {
 
 
     @GetMapping
+    @Transactional
+    // Apenas ADMIN e GERENTE pode listar usuários
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_GERENTE')")
     public ResponseEntity<Page<Proprietario>> listar(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,

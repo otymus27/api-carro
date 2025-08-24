@@ -1,4 +1,4 @@
--- Criação da tabela de relacionamento entre usuários e roles
+
 CREATE TABLE IF NOT EXISTS tb_carro_proprietario (
                     carro_id BIGINT NOT NULL,
                     proprietario_id BIGINT NOT NULL,
@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS tb_carro_proprietario (
                     FOREIGN KEY (proprietario_id) REFERENCES tb_proprietario(id) ON DELETE CASCADE
     );
 
--- Inserção na tabela de relacionamento muitos para muitos
+
 
 INSERT INTO tb_carro_proprietario (carro_id, proprietario_id) VALUES
                                                      (1, 1),

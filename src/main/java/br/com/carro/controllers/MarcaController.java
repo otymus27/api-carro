@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/marca")
-@CrossOrigin("*")
 public class MarcaController {
 
     private static final Logger logger = LoggerFactory.getLogger(CarroController.class);

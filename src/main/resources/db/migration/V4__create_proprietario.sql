@@ -5,7 +5,7 @@ CREATE TABLE tb_proprietario (
                                  telefone VARCHAR(15)
 );
 
--- Inserção de registros iniciais
+
 INSERT INTO tb_proprietario (nome, cpf, telefone) VALUES
                                                       ('FABIO', '12345678901', '11999999999'),
                                                       ('DJANE', '98765432100', '11988888888');
