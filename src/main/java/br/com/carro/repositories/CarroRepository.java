@@ -13,7 +13,6 @@ public interface CarroRepository extends JpaRepository<Carro,Long> {
     // Para busca com filtro por modelo (case insensitive)
     Page<Carro> findByModeloContainingIgnoreCase(String modelo, Pageable pageable);
 
-
     Page<Carro> findByAno(Integer ano, Pageable pageable);
 
     Page<Carro> findByMarcaNomeContainingIgnoreCase(String nomeMarca, Pageable pageable);

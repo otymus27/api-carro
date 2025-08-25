@@ -1,7 +1,6 @@
 package br.com.carro.controllers;
 
 import br.com.carro.entities.Marca;
-import br.com.carro.entities.Proprietario;
 import br.com.carro.services.MarcaService;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;

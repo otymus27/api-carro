@@ -1,5 +1,7 @@
 package br.com.carro.controllers;
 
+import br.com.carro.entities.Carro;
+import br.com.carro.entities.Usuario.Usuario;
 import br.com.carro.entities.Usuario.UsuarioCadastroDto;
 import br.com.carro.entities.Usuario.UsuarioDto;
 import br.com.carro.exceptions.ErrorMessage;
@@ -7,9 +9,14 @@ import br.com.carro.services.UsuarioService;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -21,93 +28,106 @@ import java.util.List;
 public class UsuarioController {
     private final UsuarioService usuarioService;
     private static final Logger logger = LoggerFactory.getLogger(UsuarioController.class);
+    private final PasswordEncoder passwordEncoder;
+
     public record Mensagem(String mensagem) {}
 
-    public UsuarioController(UsuarioService usuarioService) {
+    public UsuarioController(UsuarioService usuarioService, PasswordEncoder passwordEncoder) {
         this.usuarioService = usuarioService;
+        this.passwordEncoder = passwordEncoder;
     }
 
+    // Listar registros com paginação, filtros e ordenação
+    // ✅ Usuários com a role 'USER' ou 'ADMIN' podem acessar este método
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
+    @GetMapping
+    public ResponseEntity<Page<Usuario>> listar(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(required = false) String nome,
+             @RequestParam(defaultValue = "id") String sortField,
+            @RequestParam(defaultValue = "asc") String sortDir
+    ) {
+        Sort.Direction direction = "desc".equalsIgnoreCase(sortDir) ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Sort sortObj = Sort.by(direction, sortField);
+        Pageable pageable = PageRequest.of(page, size, sortObj);
+
+        Page<Usuario> lista;
+
+        if (nome != null && !nome.isBlank()) {
+            lista = usuarioService.buscarPorNome(nome, pageable);
+        } else {
+            lista = usuarioService.listar(pageable);
+        }
+
+        return ResponseEntity.ok(lista);
+    }
 
     @PostMapping()
     @Transactional
     // Apenas ADMIN pode cadastrar usuários
-    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
-    public ResponseEntity<Object> cadastrar(@RequestBody UsuarioCadastroDto dados) {
-        logger.info("Cadastrando novo usuário: {}", dados.login());
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
+    public ResponseEntity<String> cadastrar(@RequestBody Usuario usuario) {
         try {
-            UsuarioDto resposta = usuarioService.cadastrar(dados);
-            return ResponseEntity.status(HttpStatus.CREATED).body(resposta);
+            usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
+            String mensagem = this.usuarioService.cadastrar(usuario);
+            return new ResponseEntity<>(mensagem, HttpStatus.CREATED);
         } catch (Exception e) {
-            logger.error("Erro ao cadastrar usuário: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao cadastrar usuário.");
+            return new ResponseEntity<>("Erro ao cadastrar registro: " + e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
-    @GetMapping
-    @Transactional
-    // Apenas ADMIN e GERENTE pode listar usuários
-    @PreAuthorize("hasAnyAuthority('SCOPE_ADMIN', 'SCOPE_GERENTE')")
-    public ResponseEntity<List<UsuarioDto>> listar() {
-        List<UsuarioDto> usuarios = usuarioService.listar();
-        return ResponseEntity.ok(usuarios);
-    }
-
-
+    // Buscar carro por ID
     @GetMapping("/{id}")
-    @Transactional
-    // Apenas ADMIN e GERENTE pode listar usuários por id
-    @PreAuthorize("hasAnyAuthority('SCOPE_ADMIN', 'SCOPE_GERENTE')")
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     public ResponseEntity<?> buscarPorId(@PathVariable Long id) {
-        UsuarioDto usuario = usuarioService.buscarPorId(id);
-        if (usuario != null) {
-            return ResponseEntity.ok(usuario);
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ErrorMessage("Usuário com ID " + id + " não encontrado"));
-        }
-    }
-
-    @PutMapping("/{id}")
-    @Transactional
-    // Apenas ADMIN pode atualizar usuários
-    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
-    public ResponseEntity<?> atualizar(@PathVariable Long id, @RequestBody UsuarioCadastroDto dto) {
-        logger.info("Atualizando usuário com ID: {}", id);
         try {
-            UsuarioDto atualizado = usuarioService.atualizar(id, dto);
-            if (atualizado != null) {
-                return ResponseEntity.ok(atualizado);
-            } else {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(new ErrorMessage("Usuário com ID " + id + " não encontrado"));
-            }
+            // Chama o service que retorna o objeto ou lança exceção se não existir
+            Usuario usuario = usuarioService.buscarPorId(id);
+            return new ResponseEntity<>(usuario, HttpStatus.OK);
         } catch (Exception e) {
-            logger.error("Erro ao atualizar usuário", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ErrorMessage("Erro ao atualizar usuário"));
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         }
     }
 
+    // Atualizar um carro
+    @PatchMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
+    public ResponseEntity<Usuario> atualizar(@PathVariable Long id, @RequestBody Usuario usuario) { // ✅ Retorna Usuario
+        try {
+            // ✅ CORREÇÃO: Apenas codifica e define a senha se ela foi fornecida na requisição
+            if (usuario.getPassword() != null && !usuario.getPassword().isBlank()) {
+                usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
+            } else {
+                // Se a senha não foi fornecida, garantimos que ela não será atualizada.
+                // Passamos null para o service indicar que a senha não deve ser alterada.
+                // IMPORTANTE: O serviço DEVE lidar com essa lógica de não alterar senha se for null.
+                usuario.setPassword(null);
+            }
+
+            // Atualiza o usuário usando o service
+            Usuario usuarioAtualizado = this.usuarioService.atualizar(id, usuario); // ✅ Retorna o Usuario atualizado
+            return new ResponseEntity<>(usuarioAtualizado, HttpStatus.OK);
+        } catch (Exception e) {
+            logger.error("Erro ao atualizar usuário com ID {}: {}", id, e.getMessage(), e);
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST); // Retornar null ou DTO de erro
+        }
+    }
+
+    // Excluir um carro
     @DeleteMapping("/{id}")
     @Transactional
-    // Apenas ADMIN pode excluir usuários
-    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
-    public ResponseEntity<?> excluir(@PathVariable Long id) {
-        logger.info("Tentativa de exclusão do usuário com ID: {}", id);
-
-        if (id == 1L) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(new ErrorMessage("O usuário administrador principal (ID 1) não pode ser excluído."));
-        }
-
-        boolean excluido = usuarioService.excluir(id);
-        if (excluido) {
-            return ResponseEntity.ok(new Mensagem("Usuário excluído com sucesso."));
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new Mensagem("Usuário com ID " + id + " não encontrado."));
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
+    public ResponseEntity<String> excluir(@PathVariable Long id) {
+        try {
+            // Chama o service que já verifica se o carro existe e lança exceção se não existir
+            String mensagem = this.usuarioService.excluir(id);
+            return new ResponseEntity<>(mensagem, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Erro ao excluir registro: " + e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
+
 
     // Método para buscar o usuário logado
     @GetMapping("/logado")
@@ -121,13 +141,6 @@ public class UsuarioController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ErrorMessage("Usuário autenticado não encontrado"));
         }
-    }
-
-    @GetMapping("/paginado/")
-    @PreAuthorize("hasAnyAuthority('SCOPE_ADMIN', 'SCOPE_GERENTE')")
-    public List<UsuarioDto> listarPaginado(@RequestParam(defaultValue = "0") int page,
-                                           @RequestParam(defaultValue = "5") int size) {
-        return usuarioService.listarPaginado(page, size);
     }
 
 

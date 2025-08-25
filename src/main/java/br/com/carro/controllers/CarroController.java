@@ -69,7 +69,7 @@ public class CarroController {
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     public ResponseEntity<?> buscarPorId(@PathVariable Long id) {
         try {
-            // Chama o service que retorna o carro ou lança exceção se não existir
+            // Chama o service que retorna o objeto ou lança exceção se não existir
             Carro carro = carroService.buscarPorId(id);
             return new ResponseEntity<>(carro, HttpStatus.OK);
         } catch (Exception e) {

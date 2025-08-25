@@ -1,5 +1,6 @@
 package br.com.carro.services;
 
+import br.com.carro.entities.Carro;
 import br.com.carro.entities.Role.Role;
 import br.com.carro.entities.Role.RoleDto;
 import br.com.carro.entities.Usuario.Usuario;
@@ -8,6 +9,7 @@ import br.com.carro.entities.Usuario.UsuarioDto;
 import br.com.carro.repositories.RoleRepository;
 import br.com.carro.repositories.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -36,107 +38,40 @@ public class UsuarioService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public UsuarioDto cadastrar(UsuarioCadastroDto dto) {
-        // Buscar e validar roles
-        Set<Role> roles = new HashSet<>(roleRepository.findAllById(dto.roleIds()));
-        if (roles.isEmpty()) {
-            throw new IllegalArgumentException("Nenhuma role válida fornecida.");
-        }
-
-        // Criar usuário
-        Usuario usuario = new Usuario();
-        usuario.setUsername(dto.login());
-        usuario.setPassword(passwordEncoder.encode(dto.senha()));
-        usuario.setRoles(roles);
-
-        usuarioRepository.save(usuario);
-
-        // Converter para DTO de resposta
-        return new UsuarioDto(
-                usuario.getId(),
-                usuario.getUsername(),
-                usuario.getRoles().stream()
-                        .map(role -> new RoleDto(role.getId(), role.getNome()))
-                        .collect(Collectors.toSet())
-        );
+    // Cadastrar um novo registro diretamente com a entidade sem DTO's
+    public String cadastrar(Usuario usuario) {
+        // Salva o carro no banco de dados
+        this.usuarioRepository.save(usuario);
+        return "Cadastro feito com sucesso!";
     }
 
-    public List<UsuarioDto> listar() {
-        List<Usuario> usuarios = usuarioRepository.findAll();
-        return usuarios.stream().map(usuario -> {
-            Set<RoleDto> rolesDto = usuario.getRoles().stream()
-                    .map(role -> new RoleDto(role.getId(), role.getNome()))
-                    .collect(Collectors.toSet());
-
-            return new UsuarioDto(
-                    usuario.getId(),
-                    usuario.getUsername(),
-                    rolesDto
-            );
-        }).collect(Collectors.toList());
+    // Buscar carro por ID
+    public Usuario buscarPorId(Long id) throws Exception {
+        Usuario usuario = this.usuarioRepository.findById(id).get();
+        return usuario;
     }
 
-    public UsuarioDto buscarPorId(Long id) {
-        Optional<Usuario> optionalUsuario = usuarioRepository.findById(id);
-        if (optionalUsuario.isPresent()) {
-            Usuario usuario = optionalUsuario.get();
-            Set<RoleDto> rolesDto = usuario.getRoles().stream()
-                    .map(role -> new RoleDto(role.getId(), role.getNome()))
-                    .collect(Collectors.toSet());
+    public Usuario atualizar(Long id, Usuario usuarioComNovosDados) {
+        Usuario usuarioExistente = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado com ID: " + id));
 
-            return new UsuarioDto(
-                    usuario.getId(),
-                    usuario.getUsername(),
-                    rolesDto
-            );
+        usuarioExistente.setUsername(usuarioComNovosDados.getUsername());
+        // ... (Atualizar outras propriedades como roles, se estiverem presentes em usuarioComNovosDados)
+
+        // ✅ Lógica vital no Service: SÓ ATUALIZA A SENHA SE ELA FOR FORNECIDA
+        if (usuarioComNovosDados.getPassword() != null) { // Agora o Controller já fez o encode se for para atualizar
+            usuarioExistente.setPassword(usuarioComNovosDados.getPassword());
         }
-        return null;
+
+        return usuarioRepository.save(usuarioExistente);
     }
 
-    public UsuarioDto atualizar(Long id, UsuarioCadastroDto dto) {
-        Optional<Usuario> optionalUsuario = usuarioRepository.findById(id);
-        if (optionalUsuario.isPresent()) {
-            Usuario usuario = optionalUsuario.get();
-
-            usuario.setUsername(dto.login());
-
-            if (dto.senha() != null && !dto.senha().isBlank()) {
-                String senhaCriptografada = passwordEncoder.encode(dto.senha());
-                usuario.setPassword(senhaCriptografada);
-            }
-
-            // Atualiza as roles
-            if (dto.roleIds() != null) {
-                Set<Role> roles = new HashSet<>(roleRepository.findAllById(dto.roleIds()));
-                usuario.setRoles(roles);
-            }
-
-            usuarioRepository.save(usuario);
-
-            // Retorna DTO com roles atualizadas
-            Set<RoleDto> rolesDto = usuario.getRoles().stream()
-                    .map(role -> new RoleDto(role.getId(), role.getNome()))
-                    .collect(Collectors.toSet());
-
-            return new UsuarioDto(usuario.getId(), usuario.getUsername(), rolesDto);
-        }
-
-        return null;
+    // Excluir um carro
+    public String excluir(Long id) throws Exception {
+        this.usuarioRepository.deleteById(id);
+        return "Exclusão feita com sucesso!";
     }
 
-    public boolean excluir(Long id) {
-        if (id == 1L) {
-            return false; // Não permite exclusão do admin principal
-        }
-
-        Optional<Usuario> optionalUsuario = usuarioRepository.findById(id);
-        if (optionalUsuario.isPresent()) {
-            usuarioRepository.deleteById(id);
-            return true;
-        } else {
-            return false;
-        }
-    }
 
     public UsuarioDto buscarUsuarioLogado() {
         // Obtém o login (username) do usuário autenticado no contexto de segurança
@@ -159,53 +94,14 @@ public class UsuarioService {
         return null;
     }
 
-    public List<UsuarioDto> buscarPorNome(String username) {
-        List<Usuario> usuarios = usuarioRepository.findByUsernameContaining(username);
-        if (!usuarios.isEmpty()) {
-            return usuarios.stream()
-                    .map(usuario -> {
-                        // Convertendo roles para DTOs, supondo que tenha RoleDto com id e nome
-                        Set<RoleDto> rolesDto = usuario.getRoles().stream()
-                                .map(role -> new RoleDto(role.getId(), role.getNome()))
-                                .collect(Collectors.toSet());
-
-                        return new UsuarioDto(
-                                usuario.getId(),
-                                usuario.getUsername(),
-                                rolesDto
-                        );
-                    })
-                    .collect(Collectors.toList());
-        }
-        return null;
+    // Listar todas as marcas com paginação
+    public Page<Usuario> listar(Pageable pageable) {
+        return usuarioRepository.findAll(pageable);
     }
 
-
-
-    private UsuarioDto toDto(Usuario usuario) {
-        Set<RoleDto> roles = usuario.getRoles().stream()
-                .map(role -> new RoleDto(role.getId(), role.getNome()))
-                .collect(Collectors.toSet());
-
-        return new UsuarioDto(usuario.getId(), usuario.getUsername(), roles);
-    }
-
-    public List<UsuarioDto> listarPaginado(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return usuarioRepository.findAll(pageable)
-                .stream()
-                .map(u -> {
-                    Set<RoleDto> rolesDto = u.getRoles().stream()
-                            .map(role -> new RoleDto(role.getId(), role.getNome()))
-                            .collect(Collectors.toSet());
-
-                    return new UsuarioDto(
-                            u.getId(),
-                            u.getUsername(),
-                            rolesDto
-                    );
-                })
-                .collect(Collectors.toList());
+    // Listar registros filtrando por modelo (com paginação)
+    public Page<Usuario> buscarPorNome(String username, Pageable pageable) {
+        return usuarioRepository.findByUsernameContainingIgnoreCase(username,pageable);
     }
 
 
