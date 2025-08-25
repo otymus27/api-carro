@@ -1,8 +1,6 @@
 package br.com.carro.controllers;
 
-import br.com.carro.entities.Carro;
 import br.com.carro.entities.Usuario.Usuario;
-import br.com.carro.entities.Usuario.UsuarioCadastroDto;
 import br.com.carro.entities.Usuario.UsuarioDto;
 import br.com.carro.exceptions.ErrorMessage;
 import br.com.carro.services.UsuarioService;
@@ -18,9 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
-
-import java.util.List;
 
 
 @RestController
@@ -44,7 +39,7 @@ public class UsuarioController {
     public ResponseEntity<Page<Usuario>> listar(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
-            @RequestParam(required = false) String nome,
+            @RequestParam(required = false) String username,
              @RequestParam(defaultValue = "id") String sortField,
             @RequestParam(defaultValue = "asc") String sortDir
     ) {
@@ -54,8 +49,8 @@ public class UsuarioController {
 
         Page<Usuario> lista;
 
-        if (nome != null && !nome.isBlank()) {
-            lista = usuarioService.buscarPorNome(nome, pageable);
+        if (username != null && !username.isBlank()) {
+            lista = usuarioService.buscarPorNome(username, pageable);
         } else {
             lista = usuarioService.listar(pageable);
         }
