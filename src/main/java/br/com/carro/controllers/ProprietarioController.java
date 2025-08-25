@@ -35,8 +35,8 @@ public class ProprietarioController {
 
     @GetMapping
     @Transactional
-    // Apenas ADMIN e GERENTE pode listar usuários
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_GERENTE')")
+    // Apenas ADMIN e GERENTE pode listar
+    @PreAuthorize("hasAnyRole('ADMIN','GERENTE', 'BASIC')")
     public ResponseEntity<Page<Proprietario>> listar(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
@@ -64,6 +64,7 @@ public class ProprietarioController {
 
     // Buscar por ID
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','GERENTE')")
     public ResponseEntity<?> buscarPorId(@PathVariable Long id) {
         try {
             Proprietario proprietario = proprietarioService.buscarPorId(id);
@@ -78,6 +79,7 @@ public class ProprietarioController {
 
     // Cadastrar
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN','GERENTE')")
     public ResponseEntity<?> cadastrar(@RequestBody Proprietario proprietario) {
         try {
             Proprietario novoProprietario = proprietarioService.cadastrar(proprietario);
@@ -93,6 +95,7 @@ public class ProprietarioController {
     // Excluir
     @DeleteMapping("/{id}")
     @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Mensagem> excluir(@PathVariable String id) {
         try {
             // Tenta converter o ID para Long
@@ -124,6 +127,7 @@ public class ProprietarioController {
 
     // Atualizar
     @PatchMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','GERENTE')")
     public ResponseEntity<String> atualizar(@PathVariable Long id, @RequestBody Proprietario proprietario) {
         boolean atualizado = proprietarioService.atualizar(id, proprietario);
         if (atualizado) {

@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -30,6 +31,7 @@ public class MarcaController {
 
     // Listar registros com paginação, filtros e ordenação
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN','BASIC','GERENTE')")
     public ResponseEntity<Page<Marca>> listar(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
@@ -56,6 +58,7 @@ public class MarcaController {
 
     // Buscar carro por ID
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> buscarPorId(@PathVariable Long id) {
         try {
             // Chama o service que retorna o carro ou lança exceção se não existir
@@ -68,6 +71,7 @@ public class MarcaController {
 
     // Cadastrar
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> cadastrar(@RequestBody Marca marca) {
         try {
             Marca novaMarca = marcaService.cadastrar(marca);
@@ -82,6 +86,7 @@ public class MarcaController {
 
     @DeleteMapping("/{id}")
     @Transactional
+    @PreAuthorize("hasAnyRole('ADMIN','BASIC','GERENTE')")
     public ResponseEntity<String> excluir(@PathVariable Long id) {
         try {
             String msg = marcaService.excluir(id);
@@ -91,8 +96,9 @@ public class MarcaController {
         }
     }
 
-    // Atualizar um carro
+    // Atualizar um registro
     @PatchMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> atualizar(@PathVariable Long id, @RequestBody Marca marca) {
         try {
             // Atualiza o carro usando o service; se não existir, lança exceção
@@ -104,6 +110,7 @@ public class MarcaController {
     }
 
     @GetMapping("/paginado/")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<Marca>> listarPaginado(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {

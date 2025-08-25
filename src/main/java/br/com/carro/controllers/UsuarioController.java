@@ -38,8 +38,8 @@ public class UsuarioController {
     }
 
     // Listar registros com paginação, filtros e ordenação
-    // ✅ Usuários com a role 'USER' ou 'ADMIN' podem acessar este método
-    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
+    // ✅ Apenas usuários com a role 'ADMIN' podem acessar este método para gerenciar usuários.
+    @PreAuthorize("hasRole('ADMIN')") // CORRIGIDO: Era 'ROLE_ADMIN', agora é 'ADMIN'
     @GetMapping
     public ResponseEntity<Page<Usuario>> listar(
             @RequestParam(defaultValue = "0") int page,
@@ -65,8 +65,8 @@ public class UsuarioController {
 
     @PostMapping()
     @Transactional
-    // Apenas ADMIN pode cadastrar usuários
-    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
+    // ✅ Apenas usuários com a role 'ADMIN' podem acessar este método para gerenciar usuários.
+    @PreAuthorize("hasRole('ADMIN')") // CORRIGIDO: Era 'ROLE_ADMIN', agora é 'ADMIN'
     public ResponseEntity<String> cadastrar(@RequestBody Usuario usuario) {
         try {
             usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
@@ -79,7 +79,8 @@ public class UsuarioController {
 
     // Buscar carro por ID
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
+    // ✅ Apenas usuários com a role 'ADMIN' podem acessar este método para gerenciar usuários.
+    @PreAuthorize("hasRole('ADMIN')") // CORRIGIDO: Era 'ROLE_ADMIN', agora é 'ADMIN'
     public ResponseEntity<?> buscarPorId(@PathVariable Long id) {
         try {
             // Chama o service que retorna o objeto ou lança exceção se não existir
@@ -92,7 +93,8 @@ public class UsuarioController {
 
     // Atualizar um carro
     @PatchMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
+    // ✅ Apenas usuários com a role 'ADMIN' podem acessar este método para gerenciar usuários.
+    @PreAuthorize("hasRole('ADMIN')") // CORRIGIDO: Era 'ROLE_ADMIN', agora é 'ADMIN'
     public ResponseEntity<Usuario> atualizar(@PathVariable Long id, @RequestBody Usuario usuario) { // ✅ Retorna Usuario
         try {
             // ✅ CORREÇÃO: Apenas codifica e define a senha se ela foi fornecida na requisição
@@ -117,7 +119,8 @@ public class UsuarioController {
     // Excluir um carro
     @DeleteMapping("/{id}")
     @Transactional
-    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
+    // ✅ Apenas usuários com a role 'ADMIN' podem acessar este método para gerenciar usuários.
+    @PreAuthorize("hasRole('ADMIN')") // CORRIGIDO: Era 'ROLE_ADMIN', agora é 'ADMIN'
     public ResponseEntity<String> excluir(@PathVariable Long id) {
         try {
             // Chama o service que já verifica se o carro existe e lança exceção se não existir

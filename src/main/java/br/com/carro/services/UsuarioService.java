@@ -58,6 +58,25 @@ public class UsuarioService {
         usuarioExistente.setUsername(usuarioComNovosDados.getUsername());
         // ... (Atualizar outras propriedades como roles, se estiverem presentes em usuarioComNovosDados)
 
+        // ✅ Lógica para ATUALIZAR as roles
+        if (usuarioComNovosDados.getRoles() != null) {
+            // Extrai os IDs das roles recebidas do frontend (o frontend envia objetos Role com ID)
+            Set<Long> roleIds = usuarioComNovosDados.getRoles().stream()
+                    .map(Role::getId) // Mapeia cada Role para seu ID
+                    .collect(Collectors.toSet());
+
+            // Busca as entidades Role completas (gerenciadas) do banco de dados pelos IDs
+            Set<Role> rolesDoBanco = new HashSet<>(roleRepository.findAllById(roleIds));
+
+            // Seta as roles no usuário existente (substituindo as antigas)
+            usuarioExistente.setRoles(rolesDoBanco);
+        } else {
+            // Se nenhum role for fornecido, você pode optar por:
+            // 1. Manter as roles existentes (não fazer nada)
+            // 2. Limpar as roles: usuarioExistente.setRoles(new HashSet<>());
+            // Para este caso, vamos manter as roles existentes se nenhum for fornecido no DTO
+        }
+
         // ✅ Lógica vital no Service: SÓ ATUALIZA A SENHA SE ELA FOR FORNECIDA
         if (usuarioComNovosDados.getPassword() != null) { // Agora o Controller já fez o encode se for para atualizar
             usuarioExistente.setPassword(usuarioComNovosDados.getPassword());

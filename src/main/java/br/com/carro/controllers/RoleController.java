@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -34,6 +35,7 @@ public class RoleController {
 
     // Listar registros com paginação, filtros e ordenação
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<Role>> listar(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
@@ -51,6 +53,7 @@ public class RoleController {
 
     // Buscar carro por ID
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> buscarPorId(@PathVariable Long id) {
         try {
             // Chama o service que retorna o objeto ou lança exceção se não existir
@@ -63,6 +66,7 @@ public class RoleController {
 
     // Cadastrar
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> cadastrar(@RequestBody Role role) {
         try {
             Role novaRole = roleService.cadastrar(role);
@@ -77,6 +81,7 @@ public class RoleController {
 
     @DeleteMapping("/{id}")
     @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> excluir(@PathVariable Long id) {
         try {
             String msg = roleService.excluir(id);
@@ -88,6 +93,7 @@ public class RoleController {
 
     // Atualizar um carro
     @PatchMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> atualizar(@PathVariable Long id, @RequestBody Role role) {
         try {
             // Atualiza o carro usando o service; se não existir, lança exceção

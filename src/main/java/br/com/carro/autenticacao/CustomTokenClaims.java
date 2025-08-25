@@ -17,11 +17,14 @@ public class CustomTokenClaims implements OAuth2TokenCustomizer<JwtEncodingConte
     @Override
     public void customize(JwtEncodingContext context) {
         // Obtenha as permissões do usuário autenticado
-        String scopes = context.getPrincipal().getAuthorities().stream()
+        // Coleta as authorities como uma lista de Strings (ex: "ROLE_ADMIN", "ROLE_USER")
+        // Não as junta em uma única string, para que sejam uma lista JSON
+        Collection<String> authorities = context.getPrincipal().getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.joining(" "));
+                .collect(Collectors.toList());
 
-        // Adicione as permissões como uma claim "scope" no token
-        context.getClaims().claim("scope", scopes);
+        // ✅ CORREÇÃO: Adicione as permissões como uma claim "roles" (no plural) no token
+        // Isso alinha com o `setAuthoritiesClaimName("roles")` no `SecurityConfigurations`
+        context.getClaims().claim("roles", authorities);
     }
 }
