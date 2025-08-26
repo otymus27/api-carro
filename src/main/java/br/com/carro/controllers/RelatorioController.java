@@ -4,14 +4,20 @@ import br.com.carro.entities.Marca;
 import br.com.carro.services.RelatorioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+
+//
+//Este é o controlador dedicado para os relatórios. Ele recebe a requisição com o
+//formato e os filtros, e delega a tarefa de geração do arquivo para o RelatorioService.
 
 @RestController
 @RequestMapping("/api/relatorios")
@@ -20,39 +26,36 @@ public class RelatorioController {
     @Autowired
     private RelatorioService relatorioService;
 
-    // ✅ Novo Endpoint para Relatórios de Marcas
+    // ✅ Endpoint para gerar o relatório de marcas em PDF, XLS, ou CSV
     @GetMapping("/marcas")
-    public ResponseEntity<byte[]> gerarRelatorioMarcas(@RequestParam String formato) {
+    @PreAuthorize("hasAnyRole('ADMIN','BASIC','GERENTE')")
+    public ResponseEntity<byte[]> gerarRelatorioMarcas(
+            @RequestParam String formato,
+            @RequestParam(required = false) String nome) {
 
-        List<Marca> marcas = relatorioService.getAllMarcas();
+        try {
+            byte[] relatorioBytes = relatorioService.gerarRelatorioMarcas(formato, nome);
 
-        byte[] relatorioBytes;
-        String filename;
-        String contentType;
+            HttpHeaders headers = new HttpHeaders();
+            String filename = "relatorio-marcas." + formato;
 
-        switch (formato.toLowerCase()) {
-            case "csv":
-                relatorioBytes = relatorioService.gerarMarcaCsv(marcas);
-                filename = "relatorio_marcas.csv";
-                contentType = "text/csv";
-                break;
-            case "xls":
-                relatorioBytes = relatorioService.gerarMarcaXls(marcas);
-                filename = "relatorio_marcas.xlsx";
-                contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-                break;
-            case "pdf":
-                relatorioBytes = relatorioService.gerarMarcaPdf(marcas);
-                filename = "relatorio_marcas.pdf";
-                contentType = "application/pdf";
-                break;
-            default:
-                return ResponseEntity.badRequest().body("Formato de relatório inválido.".getBytes());
+            // Define o tipo de conteúdo com base no formato
+            if ("pdf".equalsIgnoreCase(formato)) {
+                headers.setContentType(MediaType.APPLICATION_PDF);
+            } else if ("xls".equalsIgnoreCase(formato)) {
+                headers.setContentType(MediaType.valueOf("application/vnd.ms-excel"));
+            } else if ("csv".equalsIgnoreCase(formato)) {
+                headers.setContentType(MediaType.valueOf("text/csv"));
+            }
+
+            // Força o download do arquivo no navegador
+            headers.setContentDispositionFormData("attachment", filename);
+
+            return new ResponseEntity<>(relatorioBytes, headers, HttpStatus.OK);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
-                .contentType(MediaType.parseMediaType(contentType))
-                .body(relatorioBytes);
     }
 }

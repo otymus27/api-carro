@@ -22,9 +22,9 @@ CREATE TABLE IF NOT EXISTS tb_usuarios_roles (
 
 -- Inserção de roles
 INSERT INTO tb_roles (nome) VALUES
-                                ('ROLE_ADMIN'),
-                                ('ROLE_BASIC'),
-                                ('ROLE_GERENTE');
+                                ('ADMIN'),
+                                ('BASIC'),
+                                ('GERENTE');
 
 -- Inserção de usuários
 INSERT INTO tb_usuarios (username, password) VALUES

@@ -35,11 +35,13 @@ public class MarcaController {
     public ResponseEntity<Page<Marca>> listar(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
-            @RequestParam(required = false) String cpf,
             @RequestParam(required = false) String nome,
             @RequestParam(defaultValue = "id") String sortField,
             @RequestParam(defaultValue = "asc") String sortDir
     ) {
+        // ✅ Adicione esta linha para verificar os parâmetros que chegam
+        System.out.println("Parâmetros de ordenação recebidos: sortField=" + sortField + ", sortDir=" + sortDir);
+
         Sort.Direction direction = "desc".equalsIgnoreCase(sortDir) ? Sort.Direction.DESC : Sort.Direction.ASC;
         Sort sortObj = Sort.by(direction, sortField);
         Pageable pageable = PageRequest.of(page, size, sortObj);

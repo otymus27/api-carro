@@ -15,6 +15,8 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
@@ -34,14 +36,27 @@ public class RelatorioService {
         this.marcaRepository = marcaRepository;
     }
 
-    // ✅ Novo método para buscar todas as marcas
-    public List<Marca> getAllMarcas() {
-        return marcaRepository.findAll();
+    /**
+     * ✅ Gerador principal de relatórios de Marcas.
+     * Recebe o formato e o filtro e delega a lógica de geração.
+     */
+    public byte[] gerarRelatorioMarcas(String formato, String nome) throws Exception {
+        // ✅ Busca os dados filtrados diretamente do repositório
+        List<Marca> marcas = marcaRepository.findByNomeContainingIgnoreCase(nome);
+
+        switch (formato.toLowerCase()) {
+            case "pdf":
+                return gerarMarcaPdf(marcas);
+            case "xls":
+                return gerarMarcaXls(marcas);
+            case "csv":
+                return gerarMarcaCsv(marcas);
+            default:
+                throw new IllegalArgumentException("Formato de relatório inválido.");
+        }
     }
 
-    // Agora, vamos criar os métodos para gerar os relatórios de marcas
-    // A lógica é semelhante à do Carro, mas usando os campos da entidade Marca.
-
+    // ✅ Métodos privados para cada formato de relatório
     public byte[] gerarMarcaCsv(List<Marca> marcas) {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
              CSVWriter writer = new CSVWriter(new OutputStreamWriter(baos, StandardCharsets.UTF_8))) {

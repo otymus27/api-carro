@@ -5,6 +5,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
+
 public interface MarcaRepository extends JpaRepository<Marca, Long> {
 
     @Override
@@ -12,4 +14,8 @@ public interface MarcaRepository extends JpaRepository<Marca, Long> {
 
     // Para busca com filtro por nome (case insensitive)
     Page<Marca> findByNomeContainingIgnoreCase(String nome, Pageable pageable);
+
+    // ✅ Método para buscar marcas que contenham a string informada, ignorando maiúsculas e minúsculas.
+    // Usado para a tela de busca e para o filtro do relatório.
+    List<Marca> findByNomeContainingIgnoreCase(String nome);
 }
