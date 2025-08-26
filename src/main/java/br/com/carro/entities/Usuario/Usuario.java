@@ -26,6 +26,13 @@ public class Usuario implements UserDetails {
 
     private String password;
 
+    /**
+     * Indica se a senha atual é provisória.
+     * Usada para forçar o usuário a alterá-la no próximo login.
+     */
+    @Column(nullable = false)
+    private boolean senhaProvisoria = false;
+
     @ManyToMany(fetch = FetchType.EAGER) // ✅ FetchType.EAGER para carregar as permissões imediatamente
     @JoinTable(
             name = "tb_usuarios_roles",
