@@ -4,5 +4,11 @@ CREATE TABLE tb_marca (
 );
 
 INSERT INTO tb_marca (nome) VALUES
+                                ('AUDI'),
+                                ('BMW'),
+                                ('CHEVROLET'),
+                                ('FIAT'),
+                                ('FORD'),
+                                ('HONDA'),
                                 ('RENAULT'),
-                                ('FIAT');
+                                ('VOLKSWAGEM');

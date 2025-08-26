@@ -17,6 +17,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
@@ -40,9 +41,28 @@ public class RelatorioService {
      * ✅ Gerador principal de relatórios de Marcas.
      * Recebe o formato e o filtro e delega a lógica de geração.
      */
-    public byte[] gerarRelatorioMarcas(String formato, String nome) throws Exception {
-        // ✅ Busca os dados filtrados diretamente do repositório
-        List<Marca> marcas = marcaRepository.findByNomeContainingIgnoreCase(nome);
+    public byte[] gerarRelatorioMarcas(
+            String formato, String nome, String sortField, String sortDir) throws Exception {
+        // ✅ Adicione esta linha de log
+        System.out.println("Gerando relatório com filtro de nome: '" + nome + "'");
+
+        List<Marca> marcas;
+
+        // ✅ A ordenação é aplicada a todos os registros, não a uma página
+        Sort sort = Sort.by(Sort.Direction.fromString(sortDir != null ? sortDir : "asc"), sortField != null ? sortField : "id");
+
+
+        // ✅ Use a lógica de filtro de nome para obter os dados do repositório
+        if (nome != null && !nome.isBlank()) {
+            // ✅ Usa o repositório para buscar a lista inteira, sem paginação
+            marcas = marcaRepository.findByNomeContainingIgnoreCase(nome, sort);
+        } else {
+            // ✅ Usa o findAll com ordenação
+            marcas = marcaRepository.findAll(sort);
+        }
+
+        // ✅ Adicione esta linha para verificar o tamanho da lista
+        System.out.println("Número de marcas encontradas para o relatório: " + marcas.size());
 
         switch (formato.toLowerCase()) {
             case "pdf":

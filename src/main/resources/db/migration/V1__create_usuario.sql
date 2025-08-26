@@ -29,8 +29,8 @@ INSERT INTO tb_roles (nome) VALUES
 -- Inserção de usuários
 INSERT INTO tb_usuarios (username, password) VALUES
                                                  ('admin', '$2a$10$1gsoSHRdVMa7UwJImK2a5OkKADIzzG9zVaA.zcXpVWPhBZ5MIY8Mi'),
-                                                 ('usuario2', '$2a$10$wgeAMfb8E1olrHj5Ko5P7T7FyvhYrgHQt18sJll8eLg1BYJc0AXve'),
-                                                 ('usuario3', '$2a$10$Vt6ldlS92W5N6HF1OS5qfIWdb0P7Zfjdqxq6rzQ3S1CnllXaZRaBu'),
+                                                 ('gabriel', '$2a$10$wgeAMfb8E1olrHj5Ko5P7T7FyvhYrgHQt18sJll8eLg1BYJc0AXve'),
+                                                 ('beatriz', '$2a$10$Vt6ldlS92W5N6HF1OS5qfIWdb0P7Zfjdqxq6rzQ3S1CnllXaZRaBu'),
                                                  ('usuario4', '$2a$10$gu9vENxyFVVic/ZJmv1iXtnH/q64jLg5c9PjBdVRwYHhM19wXy6jS'),
                                                  ('usuario5', '$2a$10$ADqjEwM1joxBvl0ivQiqK3odF2gGbzRslfvtnwTqfmRbx11P0RHgi'),
                                                  ('usuario6', '$2a$10$KKQzCN0v5qfAtKzqBaECx6HsIMHzl2i8UGyUmVoGL9NjZldY8xBda'),

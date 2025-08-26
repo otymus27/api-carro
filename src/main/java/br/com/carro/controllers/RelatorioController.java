@@ -31,10 +31,13 @@ public class RelatorioController {
     @PreAuthorize("hasAnyRole('ADMIN','BASIC','GERENTE')")
     public ResponseEntity<byte[]> gerarRelatorioMarcas(
             @RequestParam String formato,
-            @RequestParam(required = false) String nome) {
+            @RequestParam(required = false) String nome,
+            @RequestParam(required = false) String sortField,
+            @RequestParam(required = false) String sortDir)
+    {
 
         try {
-            byte[] relatorioBytes = relatorioService.gerarRelatorioMarcas(formato, nome);
+            byte[] relatorioBytes = relatorioService.gerarRelatorioMarcas(formato, nome,sortField,sortDir);
 
             HttpHeaders headers = new HttpHeaders();
             String filename = "relatorio-marcas." + formato;
