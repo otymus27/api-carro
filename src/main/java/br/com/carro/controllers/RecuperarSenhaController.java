@@ -15,8 +15,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+
+// Endpoint para recuperar senha do usuário
 @RestController
-@RequestMapping("recuperar-senha")
+@RequestMapping("api/recuperar")
 public class RecuperarSenhaController {
 
     private static final Logger logger = LoggerFactory.getLogger(RecuperarSenhaController.class);
@@ -32,7 +34,7 @@ public class RecuperarSenhaController {
      * @param dto com o id do usuário para quem será gerada a senha provisória
      * @return mensagem de sucesso ou erro caso usuário não exista
      */
-    @PostMapping("/gerar-provisoria")
+    @PostMapping("/gerar-senha")
     @Transactional
     @PreAuthorize("hasRole('ADMIN')") // CORRIGIDO: Era 'ROLE_ADMIN', agora é 'ADMIN'
     public ResponseEntity<Object> gerarSenhaProvisoria(@RequestBody RecuperaSenhaRequestDto dto) {
@@ -52,7 +54,7 @@ public class RecuperarSenhaController {
      * @param dto com id, senha provisória e nova senha definitiva
      * @return mensagem de sucesso ou erro caso dados inválidos
      */
-    @PostMapping("/confirmar-redefinicao")
+    @PostMapping("/redefinir-senha")
     @Transactional
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'BASIC')")
     public ResponseEntity<Object> confirmarRedefinicao(@RequestBody ResetSenhaRequestDto dto) {
