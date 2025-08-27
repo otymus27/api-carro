@@ -88,7 +88,7 @@ public class MarcaController {
 
     @DeleteMapping("/{id}")
     @Transactional
-    @PreAuthorize("hasAnyRole('ADMIN','BASIC','GERENTE')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> excluir(@PathVariable Long id) {
         try {
             String msg = marcaService.excluir(id);
