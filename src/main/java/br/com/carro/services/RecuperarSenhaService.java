@@ -43,12 +43,12 @@ public class RecuperarSenhaService {
      * Atualiza a senha do usuário.
      * Se for senha provisória, permite redefinir.
      *
-     * @param id do usuário
+     * @param username do usuário
      * @param senhaAtual senha provisória ou atual
      * @param novaSenha nova senha a ser definida
      */
-    public void atualizarSenha(Long id, String senhaAtual, String novaSenha) {
-        Usuario usuario = usuarioRepository.findById(id)
+    public void atualizarSenha(String username, String senhaAtual, String novaSenha) {
+        Usuario usuario = usuarioRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado."));
 
         if (!passwordEncoder.matches(senhaAtual, usuario.getPassword())) {

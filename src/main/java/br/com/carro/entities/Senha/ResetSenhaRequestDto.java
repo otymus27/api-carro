@@ -1,7 +1,7 @@
 package br.com.carro.entities.Senha;
 
 public record ResetSenhaRequestDto(
-        Long id,
+        String username,
         String senhaProvisoria,
         String novaSenha
 ) {

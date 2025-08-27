@@ -42,7 +42,7 @@ public class RecuperarSenhaController {
 
         try {
             String senhaProvisoria = recuperarSenhaService.gerarSenhaProvisoria(dto.id());
-            return ResponseEntity.ok(new Mensagem("Senha provisória gerada com sucesso: " + senhaProvisoria));
+            return ResponseEntity.ok(new Mensagem("Senha provisória gerada: " + senhaProvisoria));
         } catch (IllegalArgumentException e) {
             logger.error("Erro ao gerar senha provisória: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorMessage(e.getMessage()));
@@ -58,10 +58,10 @@ public class RecuperarSenhaController {
     @Transactional
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'BASIC')")
     public ResponseEntity<Object> confirmarRedefinicao(@RequestBody ResetSenhaRequestDto dto) {
-        logger.info("Tentando redefinir senha para ID: {}", dto.id());
+        logger.info("Tentando redefinir senha para username: {}", dto.username());
 
         try {
-            recuperarSenhaService.atualizarSenha(dto.id(), dto.senhaProvisoria(), dto.novaSenha());
+            recuperarSenhaService.atualizarSenha(dto.username(), dto.senhaProvisoria(), dto.novaSenha());
             return ResponseEntity.ok(new Mensagem("Senha redefinida com sucesso."));
         } catch (IllegalArgumentException e) {
             logger.error("Erro ao redefinir senha: {}", e.getMessage());
