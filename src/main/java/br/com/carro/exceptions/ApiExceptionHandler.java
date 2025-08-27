@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -59,6 +61,19 @@ public class ApiExceptionHandler implements AuthenticationEntryPoint {
         return error;
     }
 
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException ex) {
+        if (ex.getMessage().contains("CPF já cadastrado")) {
+            return new ResponseEntity<>(
+                    Collections.singletonMap("error", ex.getMessage()),
+                    HttpStatus.BAD_REQUEST // 400
+            );
+        }
+        return new ResponseEntity<>(
+                Collections.singletonMap("error", "Ocorreu um erro interno."),
+                HttpStatus.INTERNAL_SERVER_ERROR // 500
+        );
+    }
 
 
     @ResponseBody
